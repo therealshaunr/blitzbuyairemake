@@ -1,0 +1,129 @@
+BlitzBuyAI - Machine setup & useful commands
+==========================================
+
+Save this file somewhere you can open on the new machine (or open it in GitHub web UI)
+and copy/paste the commands directly into a terminal. Commands are grouped by task.
+
+1) Clone the repo (SSH) and run bootstrap
+-------------------------------------------------
+git clone git@github.com:therealshaun/blitzbuyai.git
+cd blitzbuyai
+bash scripts/bootstrap.sh
+
+If you prefer HTTPS:
+git clone https://github.com/therealshaun/blitzbuyai.git
+cd blitzbuyai
+bash scripts/bootstrap.sh
+
+2) If you can't clone (private) — fetch bootstrap.sh via GitHub API with a PAT
+-------------------------------------------------
+# Replace <YOUR_TOKEN> with a PAT that has repo read access
+export GITHUB_TOKEN="<YOUR_TOKEN>"
+curl -H "Authorization: token $GITHUB_TOKEN" \
+     -H "Accept: application/vnd.github.v3.raw" \
+     -L "https://api.github.com/repos/therealshaun/blitzbuyai/contents/scripts/bootstrap.sh" \
+     -o bootstrap.sh
+chmod +x bootstrap.sh
+bash bootstrap.sh
+
+3) Install Node via nvm manually (if bootstrap is not run)
+-------------------------------------------------
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+nvm install --lts
+nvm use --lts
+node -v && npm -v
+npm install
+
+4) Create local env file (do NOT commit)
+-------------------------------------------------
+cp .env.example .env.local
+# Edit .env.local and fill these two lines with your Supabase values:
+# VITE_SUPABASE_URL=https://<your-project>.supabase.co
+# VITE_SUPABASE_PUBLISHABLE_KEY=public-anon-xxxxxxxxxxxx
+
+5) Run dev server
+-------------------------------------------------
+npm run dev
+# open http://localhost:8080
+
+6) Lint, tests, and build
+-------------------------------------------------
+npm run lint
+npm run test
+npm run build:dev
+# or production build
+npm run build
+
+7) GitHub CLI (create PR locally)
+-------------------------------------------------
+# Install gh (Ubuntu):
+sudo apt update
+sudo apt install -y gh
+gh auth login
+
+# Create a PR (example)
+gh pr create --title "chore: my changes" --body "Short description" --base main --head my-feature-branch --web
+
+8) Vercel CLI (optional)
+-------------------------------------------------
+# Install
+npm install -g vercel
+vercel login
+
+# Pull env vars from Vercel (after login)
+vercel env pull .env.local
+
+9) SSH key setup (for Git push via SSH)
+-------------------------------------------------
+ssh-keygen -t ed25519 -C "your-email@example.com"
+cat ~/.ssh/id_ed25519.pub
+# Copy the output and add it to GitHub -> Settings -> SSH and GPG keys
+
+10) Ubuntu keyboard fixes (copy/paste these if keys/layout repeat badly)
+-------------------------------------------------
+# Temporary X11 layout set to US
+setxkbmap -layout us
+
+# GNOME persistent setting (makes 'us' primary input source)
+gsettings set org.gnome.desktop.input-sources sources "[('xkb','us')]"
+
+# Make key repeat faster
+gsettings set org.gnome.desktop.peripherals.keyboard repeat true
+gsettings set org.gnome.desktop.peripherals.keyboard delay 250
+gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 25
+
+# Clear XKB options (if keys are swapped)
+setxkbmap -layout us -option ""
+
+11) Fetch bootstrap via gh (if gh is installed)
+-------------------------------------------------
+gh api repos/therealshaun/blitzbuyai/contents/scripts/bootstrap.sh --jq '.content' | base64 --decode > bootstrap.sh
+chmod +x bootstrap.sh
+bash bootstrap.sh
+
+12) If curl to raw.githubusercontent.com returns 404
+-------------------------------------------------
+# Raw URLs for repo files may 404 for private repos. Use one of these:
+# - Clone the repo and run scripts/bootstrap.sh (recommended)
+# - Use the GitHub API with a PAT (see step 2)
+# - Use gh (see step 11)
+
+13) Cleanup and further commands
+-------------------------------------------------
+# Pull latest main
+git checkout main
+git pull origin main
+
+# Create a feature branch
+git checkout -b feature/my-change
+
+# After changes
+git add .
+git commit -m "feat: ..."
+git push -u origin feature/my-change
+
+14) If anything fails, copy the first ~80 lines of the failing command's output and paste here for troubleshooting.
+
+END
